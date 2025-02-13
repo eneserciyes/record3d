@@ -164,39 +164,41 @@ namespace Record3D
 
             // 3.3 Read and decode the RGB frame
             currSize = record3DHeader.rgbSize;
-            int loadedWidth, loadedHeight, loadedChannels;
-            uint8_t* rgbPixels = stbi_load_from_memory( rawMessageBuffer.data() + offset, currSize, &loadedWidth, &loadedHeight, &loadedChannels, STBI_rgb );
-            size_t decompressedRGBDataSize = loadedWidth * loadedHeight * loadedChannels * sizeof(uint8_t);
-            if ( RGBImageBuffer_.size() != decompressedRGBDataSize )
+            // int loadedWidth, loadedHeight, loadedChannels;
+            // uint8_t* rgbPixels = stbi_load_from_memory( rawMessageBuffer.data() + offset, currSize, &loadedWidth, &loadedHeight, &loadedChannels, STBI_rgb );
+            // size_t decompressedRGBDataSize = loadedWidth * loadedHeight * loadedChannels * sizeof(uint8_t);
+            if ( RGBImageBuffer_.size() != currSize )
             {
-                RGBImageBuffer_.resize(decompressedRGBDataSize);
+                RGBImageBuffer_.resize(currSize);
             }
-            memcpy( RGBImageBuffer_.data(), rgbPixels, decompressedRGBDataSize);
-            stbi_image_free( rgbPixels );
+            memcpy( RGBImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize);
+            // stbi_image_free( rgbPixels );
             offset += currSize;
 
             // 3.4 Read and decompress the depth frame
             currSize = record3DHeader.depthSize;
             // Resize the decompressed depth image buffer
-            size_t decompressedDepthDataSize = record3DHeader.depthWidth * record3DHeader.depthHeight * sizeof(float);
-            if ( depthImageBuffer_.size() != decompressedDepthDataSize )
+            // size_t decompressedDepthDataSize = record3DHeader.depthWidth * record3DHeader.depthHeight * sizeof(float);
+            if ( depthImageBuffer_.size() != currSize )
             {
-                depthImageBuffer_.resize(decompressedDepthDataSize);
+                depthImageBuffer_.resize(currSize);
             }
-
-            DecompressBuffer(rawMessageBuffer.data() + offset, currSize, depthImageBuffer_);
+            memcpy( depthImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize );
+            // DecompressBuffer(rawMessageBuffer.data() + offset, currSize, depthImageBuffer_);
             offset += currSize;
 
             // 3.5 Read and decompress the confidence frame corresponding to the depth frame
             currSize = record3DHeader.confidenceMapSize;
             // Resize the decompressed confidence image buffer
-            size_t decompressedConfidenceDataSize = record3DHeader.confidenceWidth * record3DHeader.confidenceHeight * sizeof(uint8_t);
-            if ( confidenceImageBuffer_.size() != decompressedConfidenceDataSize )
+            // size_t decompressedConfidenceDataSize = record3DHeader.confidenceWidth * record3DHeader.confidenceHeight * sizeof(uint8_t);
+            if ( confidenceImageBuffer_.size() != currSize )
             {
-                confidenceImageBuffer_.resize(decompressedConfidenceDataSize);
+                confidenceImageBuffer_.resize(currSize);
             }
 
-            DecompressBuffer(rawMessageBuffer.data() + offset, currSize, confidenceImageBuffer_);
+            memcpy( confidenceImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize );
+
+            // DecompressBuffer(rawMessageBuffer.data() + offset, currSize, confidenceImageBuffer_);
             offset += currSize;
 
             // 3.6 Read the misc buffer

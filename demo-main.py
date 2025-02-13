@@ -1,6 +1,7 @@
 import numpy as np
 from record3d import Record3DStream
 import cv2
+import liblzfse
 from threading import Event
 
 
@@ -57,12 +58,25 @@ class DemoApp:
 
             # You can now e.g. create point cloud by projecting the depth map using the intrinsic matrix.
 
-            # Postprocess it
-            if self.session.get_device_type() == self.DEVICE_TYPE__TRUEDEPTH:
-                depth = cv2.flip(depth, 1)
-                rgb = cv2.flip(rgb, 1)
+            rgb = cv2.imdecode(np.frombuffer(rgb, np.uint8), cv2.IMREAD_COLOR)
+            print(rgb.shape)
 
-            rgb = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+            # Convert compressed depth data to numpy array
+            depth_compressed = np.frombuffer(depth, np.uint8)
+            depth_decompressed = liblzfse.decompress(depth_compressed)
+            # Convert to float32 array and reshape based on RGB dimensions
+            depth = np.frombuffer(depth_decompressed, np.float32).reshape(256, 192)
+
+            confidence_compressed = np.frombuffer(confidence, np.uint8)
+            confidence_decompressed = liblzfse.decompress(confidence_compressed)
+            confidence = np.frombuffer(confidence_decompressed, np.uint8).reshape(256, 192)
+
+            # Postprocess it
+            # if self.session.get_device_type() == self.DEVICE_TYPE__TRUEDEPTH:
+            #     depth = cv2.flip(depth, 1)
+            #     rgb = cv2.flip(rgb, 1)
+
+            # rgb = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
             # Show the RGBD Stream
             cv2.imshow('RGB', rgb)
