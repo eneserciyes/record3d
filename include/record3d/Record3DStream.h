@@ -161,7 +161,7 @@ namespace Record3D
             size_t currentFrameWidth = currentFrameDepthWidth_;
             size_t currentFrameHeight = currentFrameDepthHeight_;
 
-            size_t bufferSize  = depthImageBuffer_.size() // currentFrameWidth * currentFrameHeight * sizeof(float);
+            size_t bufferSize  = depthImageBuffer_.size(); // currentFrameWidth * currentFrameHeight * sizeof(float);
             auto result        = py::array_t<float>(bufferSize);
             auto result_buffer = result.request();
             float *result_ptr  = (float *) result_buffer.ptr;
@@ -182,7 +182,7 @@ namespace Record3D
             size_t currentFrameWidth = currentFrameConfidenceWidth_;
             size_t currentFrameHeight = currentFrameConfidenceHeight_;
 
-            size_t bufferSize  = confidenceImageBuffer_.size()// currentFrameWidth * currentFrameHeight * sizeof(uint8_t);
+            size_t bufferSize  = confidenceImageBuffer_.size(); // currentFrameWidth * currentFrameHeight * sizeof(uint8_t);
             auto result        = py::array_t<uint8_t>(bufferSize);
             auto result_buffer = result.request();
             uint8_t *result_ptr  = (uint8_t *) result_buffer.ptr;
