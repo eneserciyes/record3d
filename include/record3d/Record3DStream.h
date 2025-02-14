@@ -161,13 +161,13 @@ namespace Record3D
             size_t currentFrameWidth = currentFrameDepthWidth_;
             size_t currentFrameHeight = currentFrameDepthHeight_;
 
-            size_t bufferSize  = currentFrameWidth * currentFrameHeight * sizeof(float);
-            auto result        = py::array_t<float>(currentFrameWidth * currentFrameHeight);
+            size_t bufferSize  = depthImageBuffer_.size() // currentFrameWidth * currentFrameHeight * sizeof(float);
+            auto result        = py::array_t<float>(bufferSize);
             auto result_buffer = result.request();
             float *result_ptr  = (float *) result_buffer.ptr;
 
             std::memcpy(result_ptr, depthImageBuffer_.data(), bufferSize);
-            result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth)});
+            // result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth)});
 
             return result;
         }
@@ -182,13 +182,13 @@ namespace Record3D
             size_t currentFrameWidth = currentFrameConfidenceWidth_;
             size_t currentFrameHeight = currentFrameConfidenceHeight_;
 
-            size_t bufferSize  = currentFrameWidth * currentFrameHeight * sizeof(uint8_t);
-            auto result        = py::array_t<uint8_t>(currentFrameWidth * currentFrameHeight);
+            size_t bufferSize  = confidenceImageBuffer_.size()// currentFrameWidth * currentFrameHeight * sizeof(uint8_t);
+            auto result        = py::array_t<uint8_t>(bufferSize);
             auto result_buffer = result.request();
             uint8_t *result_ptr  = (uint8_t *) result_buffer.ptr;
 
             std::memcpy(result_ptr, confidenceImageBuffer_.data(), bufferSize);
-            result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth)});
+            // result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth)});
 
             return result;
         }
@@ -221,7 +221,7 @@ namespace Record3D
             size_t currentFrameHeight = currentFrameRGBHeight_;
 
             constexpr int numChannels = 3;
-            size_t bufferSize  = RGBImageBuffer_.size() // currentFrameWidth * currentFrameHeight * numChannels * sizeof(uint8_t);
+            size_t bufferSize  = RGBImageBuffer_.size(); // currentFrameWidth * currentFrameHeight * numChannels * sizeof(uint8_t);
             auto result        = py::array_t<uint8_t>(bufferSize);
             auto result_buffer = result.request();
             uint8_t *result_ptr  = (uint8_t *) result_buffer.ptr;
