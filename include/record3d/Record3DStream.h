@@ -221,13 +221,13 @@ namespace Record3D
             size_t currentFrameHeight = currentFrameRGBHeight_;
 
             constexpr int numChannels = 3;
-            size_t bufferSize  = currentFrameWidth * currentFrameHeight * numChannels * sizeof(uint8_t);
+            size_t bufferSize  = RGBImageBuffer_.size() // currentFrameWidth * currentFrameHeight * numChannels * sizeof(uint8_t);
             auto result        = py::array_t<uint8_t>(bufferSize);
             auto result_buffer = result.request();
             uint8_t *result_ptr  = (uint8_t *) result_buffer.ptr;
 
             std::memcpy(result_ptr, RGBImageBuffer_.data(), bufferSize);
-            result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth), numChannels});
+            // result.resize(std::vector<int>{static_cast<int>(currentFrameHeight), static_cast<int>(currentFrameWidth), numChannels});
 
             return result;
         }
