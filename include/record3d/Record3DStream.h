@@ -75,16 +75,6 @@ namespace Record3D
         void StreamProcessingRunloop();
 
         /**
-         * Decompresses incoming compressed depth frame into $destinationBuffer of known size.
-         *
-         * @param $compressedBuffer the buffer containing LZFSE-compressed depth frame.
-         * @param $compressedBufferSize size of the compressed buffer.
-         * @param $destinationBuffer buffer into which the decompressed depth frame is going to be written.
-         * @returns pointer to the decompressed buffer. In case of decompression failure, `nullptr` is returned.
-         */
-        uint8_t* DecompressBuffer(const uint8_t* $compressedBuffer, size_t $compressedBufferSize, std::vector<uint8_t> &$destinationBuffer);
-
-        /**
          * Wraps the standard `recv()` function to ensure the *exact* amount of bytes (`$numBytesToRead`) is read into the $outputBuffer.
          *
          * @param $socketHandle socket handle obtained as the return value of `usbmuxd_connect()`.
@@ -273,8 +263,6 @@ namespace Record3D
         size_t currentFrameConfidenceHeight_{ 0 };
 
         DeviceType currentDeviceType_ {};
-
-        uint8_t* lzfseScratchBuffer_{ nullptr }; /** Preallocated LZFSE scratch buffer. */
 
         int socketHandle_{ -1 }; /** Socket handle representing connection to iDevice. */
         std::atomic<bool> connectionEstablished_{ false }; /** Flag  */

@@ -1,9 +1,8 @@
 #include "../include/record3d/Record3DStream.h"
-#include "JPEGDecoder.h"
-#include <lzfse.h>
 #include <usbmuxd.h>
 #include <cstring>
 #include <array>
+#include <string>
 
 #define NTOHL_(n) (((((unsigned long)(n) & 0xFF)) << 24) | \
                   ((((unsigned long)(n) & 0xFF00)) << 8) | \
@@ -14,13 +13,11 @@
 namespace Record3D
 {
     Record3DStream::Record3DStream()
-        : lzfseScratchBuffer_( new uint8_t[lzfse_decode_scratch_size()] )
     {
     }
 
     Record3DStream::~Record3DStream()
     {
-        delete[] lzfseScratchBuffer_;
     }
 
     std::vector<DeviceInfo> Record3DStream::GetConnectedDevices()
@@ -164,33 +161,26 @@ namespace Record3D
 
             // 3.3 Read and decode the RGB frame
             currSize = record3DHeader.rgbSize;
-            // int loadedWidth, loadedHeight, loadedChannels;
-            // uint8_t* rgbPixels = stbi_load_from_memory( rawMessageBuffer.data() + offset, currSize, &loadedWidth, &loadedHeight, &loadedChannels, STBI_rgb );
-            // size_t decompressedRGBDataSize = loadedWidth * loadedHeight * loadedChannels * sizeof(uint8_t);
             if ( RGBImageBuffer_.size() != currSize )
             {
                 RGBImageBuffer_.resize(currSize);
             }
             memcpy( RGBImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize);
-            // stbi_image_free( rgbPixels );
             offset += currSize;
 
             // 3.4 Read and decompress the depth frame
             currSize = record3DHeader.depthSize;
             // Resize the decompressed depth image buffer
-            // size_t decompressedDepthDataSize = record3DHeader.depthWidth * record3DHeader.depthHeight * sizeof(float);
             if ( depthImageBuffer_.size() != currSize )
             {
                 depthImageBuffer_.resize(currSize);
             }
             memcpy( depthImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize );
-            // DecompressBuffer(rawMessageBuffer.data() + offset, currSize, depthImageBuffer_);
             offset += currSize;
 
             // 3.5 Read and decompress the confidence frame corresponding to the depth frame
             currSize = record3DHeader.confidenceMapSize;
             // Resize the decompressed confidence image buffer
-            // size_t decompressedConfidenceDataSize = record3DHeader.confidenceWidth * record3DHeader.confidenceHeight * sizeof(uint8_t);
             if ( confidenceImageBuffer_.size() != currSize )
             {
                 confidenceImageBuffer_.resize(currSize);
@@ -198,7 +188,6 @@ namespace Record3D
 
             memcpy( confidenceImageBuffer_.data(), rawMessageBuffer.data() + offset, currSize );
 
-            // DecompressBuffer(rawMessageBuffer.data() + offset, currSize, confidenceImageBuffer_);
             offset += currSize;
 
             // 3.6 Read the misc buffer
@@ -244,24 +233,6 @@ namespace Record3D
         }
 
         Disconnect();
-    }
-
-    uint8_t* Record3DStream::DecompressBuffer(const uint8_t* $compressedBuffer, size_t $compressedBufferSize, std::vector<uint8_t> &$destinationBuffer)
-    {
-        size_t outSize = lzfse_decode_buffer(static_cast<uint8_t*>($destinationBuffer.data()),
-                                             $destinationBuffer.size(),
-                                             $compressedBuffer,
-                                             $compressedBufferSize,
-                                             lzfseScratchBuffer_ );
-        if ( outSize != $destinationBuffer.size() )
-        {
-#if DEBUG
-            fprintf( stderr, "Decompression error!\n" );
-#endif
-            return nullptr;
-        }
-
-        return reinterpret_cast<uint8_t*>( $destinationBuffer.data() );
     }
 
     uint32_t Record3DStream::ReceiveWholeBuffer(int $socketHandle, uint8_t* $outputBuffer, uint32_t $numBytesToRead)
